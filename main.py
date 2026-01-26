@@ -41,6 +41,7 @@ load_dotenv()
 
 # Create OpenAI client using API key from environment
 # This avoids hardcoding the API key (security best practice)
+# Creates a client to communicate with OpenAI servers
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
@@ -99,6 +100,11 @@ def summarize_text(text):
     text = text[:4000]
 
     # Send request to OpenAI using Responses API
+
+    #Internal working:
+    # Text → tokens
+    #Tokens → AI model AI predicts next words # Summary returned
+    # “AI doesn’t understand language — it predicts patterns.”
     response = client.responses.create(
         model="gpt-5-mini",  # Lightweight, fast, low-cost model
         input=(
@@ -108,6 +114,9 @@ def summarize_text(text):
     )
 
     # Extract and return only the readable text output
+    # API response is JSON
+
+# This extracts only the final readable answer
     return response.output_text
 
 
@@ -119,6 +128,8 @@ def summarize_text(text):
 pdf_text = read_pdf("sample.pdf")
 
 # Step 2: Validate PDF content
+# Prevents summarizing empty content
+# Avoids wasting API calls
 if not pdf_text.strip():
     raise ValueError("PDF contains no readable text")
 
@@ -128,5 +139,6 @@ summary = summarize_text(pdf_text)
 # Step 4: Display result
 print("\n========== AI GENERATED SUMMARY ==========\n")
 print(summary)
+
 
 
