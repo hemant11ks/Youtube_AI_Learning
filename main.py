@@ -91,6 +91,11 @@ def summarize_text(text):
 
     # Limit text size to control cost and avoid token overflow
     # AI models charge per token (large input = higher cost)
+    # text is a string
+
+    # Strings are sliced by character index
+  
+    # Each letter, space, or symbol = 1 character
     text = text[:4000]
 
     # Send request to OpenAI using Responses API
@@ -123,4 +128,5 @@ summary = summarize_text(pdf_text)
 # Step 4: Display result
 print("\n========== AI GENERATED SUMMARY ==========\n")
 print(summary)
+
 
