@@ -8,6 +8,18 @@
 # 4. Prints the summary
 # ============================================================
 
+# “The AI model we’re using is a Large Language Model. It’s trained on huge amounts of text, so it has learned how language works.”
+
+# “When we send text from a PDF, the AI does not read it like humans. It breaks the text into small pieces called tokens.”
+
+# “These tokens go through a neural network, which predicts the most important information and generates a summary.”
+
+# “The model is not searching the internet, and it does not remember our data after the response.”
+
+# “We’re using ChatGPT-5 Mini because it’s fast, low-cost, and perfect for tasks like summarization.”
+
+# “In Python, we’re simply sending text to the model, waiting for the prediction, and getting the summary back.”
+
 
 # -------------------------------
 # IMPORT REQUIRED MODULES
@@ -111,3 +123,4 @@ summary = summarize_text(pdf_text)
 # Step 4: Display result
 print("\n========== AI GENERATED SUMMARY ==========\n")
 print(summary)
+
