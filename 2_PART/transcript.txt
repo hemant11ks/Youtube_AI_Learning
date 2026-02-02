@@ -1,0 +1,28 @@
+Good morning everyone.
+
+Let’s start today’s meeting by reviewing the current project timeline and overall progress.
+
+The backend development is progressing well.
+Most of the core APIs are already implemented, and the remaining work is expected to be completed by next Friday.
+Some validation and error-handling tasks are still pending and need to be finalized before integration.
+
+On the frontend side, the UI changes are still pending.
+The design team needs to review the latest requirements and finalize the updated screens.
+Once the designs are approved, the frontend implementation can start immediately.
+
+Hemant will handle the API integration.
+He will coordinate with the frontend team to ensure smooth communication.
+Hemant will also prepare basic API documentation to support testing.
+
+We also discussed the testing and deployment plan.
+The QA team will begin testing after backend and frontend integration is completed.
+Any critical issues identified during testing should be reported immediately.
+
+The deployment will first be done in the staging environment.
+After final approval, the application will be deployed to production.
+
+Our next meeting is scheduled for Monday.
+Please make sure all assigned tasks are updated before the next meeting.
+
+Thank you everyone for your time.
+Let’s stay aligned and keep the momentum going.
