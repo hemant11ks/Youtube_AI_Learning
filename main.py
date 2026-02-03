@@ -8,32 +8,6 @@
 # 4. Prints the summary
 # ============================================================
 
-“AI is everywhere, but most people think it’s complicated.
-In this video, I’ll show you how to build a real AI application using Python, without machine learning, without math, and without confusion.
-This is the first video of my Python AI series, and we’re starting with something practical — an AI that reads a PDF and generates a summary automatically.”
-
-“Have you ever spent hours reading a long PDF?
-What if Python and AI could summarize it in seconds?
-In this video, I’ll show you how to build an AI-powered PDF summarizer using Python.
-This is the first video in my Python AI series, where we focus on real-world automation, not theory.”
-
-# “The AI model we’re using is a Large Language Model. It’s trained on huge amounts of text, so it has learned how language works.”
-
-# “When we send text from a PDF, the AI does not read it like humans. It breaks the text into small pieces called tokens.”
-
-# “These tokens go through a neural network, which predicts the most important information and generates a summary.”
-
-# “The model is not searching the internet, and it does not remember our data after the response.”
-
-# “We’re using ChatGPT-5 Mini because it’s fast, low-cost, and perfect for tasks like summarization.”
-
-# “In Python, we’re simply sending text to the model, waiting for the prediction, and getting the summary back.”
-
-
-# -------------------------------
-# IMPORT REQUIRED MODULES
-# -------------------------------
-
 from pypdf import PdfReader          # Used to read and extract text from PDF files
 from dotenv import load_dotenv       # Used to load environment variables from .env file
 import os                            # Used to access environment variables
@@ -148,6 +122,7 @@ summary = summarize_text(pdf_text)
 # Step 4: Display result
 print("\n========== AI GENERATED SUMMARY ==========\n")
 print(summary)
+
 
 
 
