@@ -2,6 +2,8 @@
 # AI MEETING NOTES GENERATOR USING PYTHON
 # ============================================================
 
+#    model="gpt-4o-mini-transcribe"   # Speech recognition model
+
 # “Yesterday in my office someone said — Can you share the meeting notes?
 # And the meeting was one hour long 😭
 
@@ -216,5 +218,6 @@ def main():
 # Entry point of program
 if __name__ == "__main__":
     main()
+
 
 
