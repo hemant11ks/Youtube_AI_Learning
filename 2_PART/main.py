@@ -2,6 +2,31 @@
 # AI MEETING NOTES GENERATOR USING PYTHON
 # ============================================================
 
+# “Yesterday in my office someone said — Can you share the meeting notes?
+# And the meeting was one hour long 😭
+
+# Instead of listening again, I built a Python script that listens to meeting audio, understands the discussion, and automatically writes professional meeting notes using AI.
+
+# In this video, I’ll show you step-by-step how to build an AI Meeting Notes Generator using Python that converts audio into summary, key points, decisions, and action items.
+
+# By the end of this video, you’ll have a real automation project you can use in your job and add to your resume. Let’s start!” 🎬
+
+# Meeting Audio → Speech to Text → AI Understanding → Structured Notes → Save File
+# “So our Python script listens to meeting audio, converts it into text, uses AI to understand the discussion,
+# structures the notes safely, and finally saves them automatically into a file.”
+
+# Generate:
+
+# Summary
+
+# Key Points
+
+# Decisions
+
+# Action Items
+
+# This is called Prompt Engineering.
+
 # -------------------------------
 # IMPORT REQUIRED MODULES
 # -------------------------------
@@ -191,4 +216,5 @@ def main():
 # Entry point of program
 if __name__ == "__main__":
     main()
+
 
