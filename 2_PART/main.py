@@ -1,112 +1,92 @@
 # ============================================================
 # AI MEETING NOTES GENERATOR USING PYTHON
 # ============================================================
-# What this script does:
-# 1. Takes a meeting audio file
-# 2. Converts speech to text using AI
-# 3. Converts raw text into structured meeting notes
-# 4. Segregates notes into sections
-# 5. Prints and stores notes cleanly
+# Steps:
+# 1. Convert meeting audio to text
+# 2. Send transcript to AI
+# 3. Generate structured meeting notes
+# 4. Safely parse AI output
+# 5. Print and store notes
 # ============================================================
+
 
 # -------------------------------
 # IMPORT REQUIRED MODULES
 # -------------------------------
 
-from dotenv import load_dotenv       # Loads environment variables securely
-import os                            # Access system environment variables
-from openai import OpenAI            # OpenAI client for AI models
+from dotenv import load_dotenv
+import os
+from openai import OpenAI
 
 
 # -------------------------------
-# LOAD ENVIRONMENT VARIABLES
+# LOAD API KEY
 # -------------------------------
 
-# Load variables from .env file into memory
 load_dotenv()
 
-# Read API key from environment
 API_KEY = os.getenv("OPENAI_API_KEY")
 
-# Stop program if API key is missing
 if not API_KEY:
-    raise ValueError("OPENAI_API_KEY not found. Please check your .env file.")
+    raise ValueError("OPENAI_API_KEY not found in .env file")
 
-
-# -------------------------------
-# INITIALIZE OPENAI CLIENT
-# -------------------------------
-
-# Create OpenAI client using API key
 client = OpenAI(api_key=API_KEY)
 
 
 # -------------------------------
-# FUNCTION: TRANSCRIBE AUDIO
+# TRANSCRIBE AUDIO
 # -------------------------------
 
-def transcribe_audio(audio_file_path):
+def transcribe_audio(audio_path):
     """
-    Converts meeting audio into text using AI speech-to-text.
-
-    Args:
-        audio_file_path (str): Path to audio file
-
-    Returns:
-        str: Transcribed meeting text
+    Converts meeting audio into text using AI.
     """
 
-    # Open audio file in binary mode
-    with open(audio_file_path, "rb") as audio_file:
-
-        # Call OpenAI transcription model
+    with open(audio_path, "rb") as audio_file:
         transcription = client.audio.transcriptions.create(
-            file=audio_file,                    # Audio input
-            model="gpt-4o-mini-transcribe"      # Fast & accurate transcription model
+            file=audio_file,
+            model="gpt-4o-mini-transcribe"
         )
-    # Return only the transcribed text
+
     return transcription.text
 
 
 # -------------------------------
-# FUNCTION: GENERATE MEETING NOTES
+# GENERATE MEETING NOTES
 # -------------------------------
 
 def generate_meeting_notes(transcript):
     """
-    Converts raw transcript into structured meeting notes.
-
-    Args:
-        transcript (str): Transcribed meeting text
-
-    Returns:
-        str: Structured meeting notes
+    Converts transcript into structured meeting notes.
     """
 
-    # Limit input size to reduce cost and improve performance
-    transcript = transcript[:4000]
+    transcript = transcript[:4000]  # cost & safety control
 
-    # Prompt instructing AI how to structure output
     prompt = f"""
-    You are a professional meeting assistant.
+You are a professional meeting assistant.
 
-    Convert the following transcript into structured meeting notes
-    using EXACTLY the format below:
-    SUMMARY:
-    - 
-    KEY POINTS:
-    - 
-    DECISIONS:
-    - 
-    ACTION ITEMS:
-    - 
-    Transcript:
-    {transcript}
-    """
+IMPORTANT:
+Return output in EXACT format below.
+Do not change headings.
 
-    # Send prompt to AI model
+SUMMARY:
+- 
+
+KEY POINTS:
+- 
+
+DECISIONS:
+- 
+
+ACTION ITEMS:
+- 
+
+Transcript:
+{transcript}
+"""
+
     response = client.responses.create(
-        model="gpt-5-mini",     # Lightweight summarization model
+        model="gpt-5-mini",
         input=prompt
     )
 
@@ -114,18 +94,12 @@ def generate_meeting_notes(transcript):
 
 
 # -------------------------------
-# FUNCTION: SEGREGATE NOTES
+# SAFE SEGREGATION LOGIC
 # -------------------------------
 
 def segregate_notes(notes_text):
     """
-    Separates AI output into individual sections.
-
-    Args:
-        notes_text (str): Full AI-generated notes
-
-    Returns:
-        dict: Segregated meeting notes
+    Extracts meeting sections safely even if formatting varies.
     """
 
     sections = {
@@ -137,93 +111,90 @@ def segregate_notes(notes_text):
 
     current_section = None
 
-    # Process notes line by line
     for line in notes_text.splitlines():
-        line = line.strip()
+        clean = line.strip().upper()
 
-        # Check if line is a section heading
-        if line in sections:
-            current_section = line
-        elif current_section and line:
-            sections[current_section] += line + "\n"
+        if clean.startswith("SUMMARY"):
+            current_section = "SUMMARY"
+        elif clean.startswith("KEY POINTS"):
+            current_section = "KEY POINTS"
+        elif clean.startswith("DECISIONS"):
+            current_section = "DECISIONS"
+        elif clean.startswith("ACTION ITEMS"):
+            current_section = "ACTION ITEMS"
+        elif current_section and line.strip():
+            sections[current_section] += line.strip() + "\n"
+
+    # Fallback safety
+    for key in sections:
+        if not sections[key].strip():
+            sections[key] = "No information detected.\n"
 
     return sections
 
 
 # -------------------------------
-# FUNCTION: PRINT MEETING NOTES
+# PRINT NOTES
 # -------------------------------
 
-def print_meeting_notes(sections):
-    """
-    Prints segregated meeting notes neatly.
-    """
+def print_notes(sections):
     print("\n📝 MEETING SUMMARY")
     print(sections["SUMMARY"])
 
-    print("\n📌 KEY POINTS")
+    print("📌 KEY POINTS")
     print(sections["KEY POINTS"])
 
-    print("\n✅ DECISIONS")
+    print("✅ DECISIONS")
     print(sections["DECISIONS"])
 
-    print("\n🚀 ACTION ITEMS")
+    print("🚀 ACTION ITEMS")
     print(sections["ACTION ITEMS"])
 
 
 # -------------------------------
-# FUNCTION: SAVE NOTES TO FILE
+# SAVE NOTES
 # -------------------------------
 
 def save_notes(sections):
-    """
-    Saves meeting notes in a clean text file.
-    """
-
     with open("meeting_notes.txt", "w", encoding="utf-8") as file:
         for title, content in sections.items():
             file.write(f"{title}\n")
             file.write("-" * 40 + "\n")
-            file.write(content + "\n\n")
+            file.write(content + "\n")
 
 
 # -------------------------------
-# MAIN FUNCTION
+# MAIN FLOW
 # -------------------------------
 
 def main():
-    """
-    Controls the full execution flow.
-    """
-
     print("\n🎙️ AI MEETING NOTES GENERATOR STARTED\n")
 
     audio_path = "meeting.mp3"
 
-    # Step 1: Transcribe audio
     print("🔊 Transcribing meeting audio...")
     transcript = transcribe_audio(audio_path)
 
     if not transcript.strip():
-        raise ValueError("Transcription failed or audio is empty.")
+        raise ValueError("Transcription failed or audio empty")
 
-    print("📝 Transcription completed.\n")
-    # Step 2: Generate meeting notes
+    print("📝 Transcription completed\n")
+
     print("🤖 Generating structured meeting notes...")
     notes = generate_meeting_notes(transcript)
-    # Step 3: Segregate notes
+
     sections = segregate_notes(notes)
-    # Step 4: Print notes
-    print_meeting_notes(sections)
-    # Step 5: Save notes
+
+    print_notes(sections)
+
     save_notes(sections)
 
-    print("\n✅ Meeting notes saved successfully!\n")
+    print("\n✅ Meeting notes saved successfully!")
+
 
 # -------------------------------
-# PROGRAM ENTRY POINT
+# ENTRY POINT
 # -------------------------------
 
-# Ensures script runs only when executed directly
 if __name__ == "__main__":
     main()
