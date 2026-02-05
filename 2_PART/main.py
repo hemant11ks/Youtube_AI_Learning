@@ -147,6 +147,18 @@ def segregate_notes(notes_text):
 def save_notes(sections):
     """Save meeting notes to text file."""
 
+     # sections is a dictionary like:
+    # {
+    #   "SUMMARY": "text...",
+    #   "KEY POINTS": "text...",
+    #   "DECISIONS": "text...",
+    #   "ACTION ITEMS": "text..."
+    # }
+    
+    # Loop through dictionary key-value pairs
+    # title   → dictionary KEY   (e.g., SUMMARY)
+    # content → dictionary VALUE (actual notes text)
+
     with open("meeting_notes.txt", "w", encoding="utf-8") as file:
         for title, content in sections.items():
             file.write(f"{title}\n")
@@ -179,3 +191,4 @@ def main():
 # Entry point of program
 if __name__ == "__main__":
     main()
+
