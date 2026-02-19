@@ -2,8 +2,8 @@ import sys
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles import Border, Side
-from datetime import datetime
 from openpyxl.utils import get_column_letter
+from datetime import datetime
 import copy
 
 
@@ -22,7 +22,6 @@ def apply_style(path):
         bottom=Side(style='thin')
     )
 
-    # Iterate over all worksheets
     for ws in wb.worksheets:
 
         # Set column width
@@ -30,13 +29,12 @@ def apply_style(path):
             col_letter = get_column_letter(col_idx)
             ws.column_dimensions[col_letter].width = 18
 
-        # Apply border to all cells
-        for row in ws.iter_rows(min_row=1, max_row=ws.max_row,
-                                min_col=1, max_col=ws.max_column):
+        # Apply borders
+        for row in ws.iter_rows(min_row=1,
+                                max_row=ws.max_row,
+                                min_col=1,
+                                max_col=ws.max_column):
             for cell in row:
-                if cell.has_style:
-                    cell.border = copy.copy(cell.border)
-
                 cell.border = thin_border
 
     wb.save(path)
@@ -48,18 +46,18 @@ def apply_style(path):
 
 def update_execution_report(path, BuildNumber, Trigger, Iteration):
 
-    # Load data from Excel
+    # Load execution sheet using pandas
     execution_report_data = pd.read_excel(path, sheet_name="Sheet1")
-    status_data = pd.read_excel(path, sheet_name="Summary")
 
-    # Get current date
     current_date = datetime.today().strftime("%Y-%m-%d")
 
-    # Ensure current date column exists in execution sheet
     if current_date not in execution_report_data.columns:
         raise ValueError(f"{current_date} column not found in Sheet1")
 
-    # Calculate benchmark data
+    # ---------------------------------------------------------
+    # CALCULATE METRICS
+    # ---------------------------------------------------------
+
     total_ts = len(execution_report_data[current_date].dropna())
 
     passed_ts = len(
@@ -87,51 +85,50 @@ def update_execution_report(path, BuildNumber, Trigger, Iteration):
     )
 
     # ---------------------------------------------------------
-    # UPDATE SUMMARY SHEET STRUCTURE
+    # OPEN SUMMARY SHEET USING OPENPYXL
     # ---------------------------------------------------------
 
-    # Required fixed row labels
-    required_rows = [
-        "Date",
-        "BuildNumber",
-        "Trigger",
-        "Iteration",
-        "KITE Tool Version",
-        "Total TS",
-        "Pass",
-        "Fail",
-        "VERIFYMANUALLY",
-        "Not Executed"
-    ]
+    wb = load_workbook(path)
+    ws_summary = wb["Summary"]
 
-    # Ensure first column contains required rows
-    if "Metric" not in status_data.columns:
-        status_data = pd.DataFrame({"Metric": required_rows})
-    else:
-        status_data = status_data.set_index("Metric")
-        for row in required_rows:
-            if row not in status_data.index:
-                status_data.loc[row] = ""
-        status_data = status_data.reset_index()
+    # Find next empty column
+    next_col = ws_summary.max_column + 1
 
-    # Add new date column if not present
-    if current_date not in status_data.columns:
-        status_data[current_date] = ""
+    # ---------------------------------------------------------
+    # WRITE DATA INTO FIXED ROW STRUCTURE
+    # ---------------------------------------------------------
 
-    # Fill values under current date column
-    status_data.loc[status_data["Metric"] == "Date", current_date] = current_date
-    status_data.loc[status_data["Metric"] == "BuildNumber", current_date] = BuildNumber
-    status_data.loc[status_data["Metric"] == "Trigger", current_date] = Trigger
-    status_data.loc[status_data["Metric"] == "Iteration", current_date] = Iteration
-    status_data.loc[status_data["Metric"] == "Total TS", current_date] = total_ts
-    status_data.loc[status_data["Metric"] == "Pass", current_date] = passed_ts
-    status_data.loc[status_data["Metric"] == "Fail", current_date] = failed_ts
-    status_data.loc[status_data["Metric"] == "VERIFYMANUALLY", current_date] = verification_ts
-    status_data.loc[status_data["Metric"] == "Not Executed", current_date] = not_executed_ts
+    ws_summary.cell(row=1, column=next_col).value = current_date
+    ws_summary.cell(row=2, column=next_col).value = BuildNumber
+    ws_summary.cell(row=3, column=next_col).value = Trigger
+    ws_summary.cell(row=4, column=next_col).value = Iteration
 
-    # Write back to Excel
-    with pd.ExcelWriter(path, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
-        status_data.to_excel(writer, sheet_name="Summary", index=False)
+    # Row 5 = KITE Tool Version (kept as existing structure)
+
+    ws_summary.cell(row=6, column=next_col).value = total_ts
+    ws_summary.cell(row=7, column=next_col).value = passed_ts
+    ws_summary.cell(row=8, column=next_col).value = failed_ts
+    ws_summary.cell(row=9, column=next_col).value = verification_ts
+    ws_summary.cell(row=10, column=next_col).value = not_executed_ts
+
+    wb.save(path)
 
     # Apply formatting
     apply_style(path)
+
+
+# ---------------------------------------------------------
+# OPTIONAL: MAIN EXECUTION (Example Usage)
+# ---------------------------------------------------------
+
+if __name__ == "__main__":
+
+    file_path = "your_excel_file.xlsx"
+
+    BuildNumber = "BuildNumber_1234"
+    Trigger = "02:06:21"
+    Iteration = "IdNu"
+
+    update_execution_report(file_path, BuildNumber, Trigger, Iteration)
+
+    print("Execution report updated successfully.")
