@@ -29,7 +29,7 @@ def apply_style(path):
             col_letter = get_column_letter(col_idx)
             ws.column_dimensions[col_letter].width = 18
 
-        # Apply borders
+        # Apply border
         for row in ws.iter_rows(min_row=1,
                                 max_row=ws.max_row,
                                 min_col=1,
@@ -46,7 +46,10 @@ def apply_style(path):
 
 def update_execution_report(path, BuildNumber, Trigger, Iteration):
 
-    # Load execution sheet using pandas
+    # ---------------------------------------------------------
+    # LOAD SHEET1 USING PANDAS
+    # ---------------------------------------------------------
+
     execution_report_data = pd.read_excel(path, sheet_name="Sheet1")
 
     current_date = datetime.today().strftime("%Y-%m-%d")
@@ -89,46 +92,46 @@ def update_execution_report(path, BuildNumber, Trigger, Iteration):
     # ---------------------------------------------------------
 
     wb = load_workbook(path)
-    ws_summary = wb["Summary"]
+    ws = wb["Summary"]
 
-    # Find next empty column
-    next_col = ws_summary.max_column + 1
+    # Determine next empty column
+    next_col = ws.max_column + 1
+    prev_col = ws.max_column   # Used for copying format
 
     # ---------------------------------------------------------
-    # WRITE DATA INTO FIXED ROW STRUCTURE
+    # WRITE VALUES DIRECTLY (NO DICTIONARY)
     # ---------------------------------------------------------
 
-    ws_summary.cell(row=1, column=next_col).value = current_date
-    ws_summary.cell(row=2, column=next_col).value = BuildNumber
-    ws_summary.cell(row=3, column=next_col).value = Trigger
-    ws_summary.cell(row=4, column=next_col).value = Iteration
+    ws.cell(row=1, column=next_col).value = current_date
+    ws.cell(row=2, column=next_col).value = BuildNumber
+    ws.cell(row=3, column=next_col).value = Trigger
+    ws.cell(row=4, column=next_col).value = Iteration
 
-    # Row 5 = KITE Tool Version (kept as existing structure)
+    # Row 5 = KITE Tool Version (already exists in structure)
 
-    ws_summary.cell(row=6, column=next_col).value = total_ts
-    ws_summary.cell(row=7, column=next_col).value = passed_ts
-    ws_summary.cell(row=8, column=next_col).value = failed_ts
-    ws_summary.cell(row=9, column=next_col).value = verification_ts
-    ws_summary.cell(row=10, column=next_col).value = not_executed_ts
+    ws.cell(row=6, column=next_col).value = total_ts
+    ws.cell(row=7, column=next_col).value = passed_ts
+    ws.cell(row=8, column=next_col).value = failed_ts
+    ws.cell(row=9, column=next_col).value = verification_ts
+    ws.cell(row=10, column=next_col).value = not_executed_ts
+
+    # ---------------------------------------------------------
+    # COPY FORMATTING FROM PREVIOUS COLUMN
+    # ---------------------------------------------------------
+
+    for row in range(1, 11):
+
+        old_cell = ws.cell(row=row, column=prev_col)
+        new_cell = ws.cell(row=row, column=next_col)
+
+        if old_cell.has_style:
+            new_cell.font = copy.copy(old_cell.font)
+            new_cell.border = copy.copy(old_cell.border)
+            new_cell.fill = copy.copy(old_cell.fill)
+            new_cell.number_format = copy.copy(old_cell.number_format)
+            new_cell.protection = copy.copy(old_cell.protection)
+            new_cell.alignment = copy.copy(old_cell.alignment)
 
     wb.save(path)
 
-    # Apply formatting
     apply_style(path)
-
-
-# ---------------------------------------------------------
-# OPTIONAL: MAIN EXECUTION (Example Usage)
-# ---------------------------------------------------------
-
-if __name__ == "__main__":
-
-    file_path = "your_excel_file.xlsx"
-
-    BuildNumber = "BuildNumber_1234"
-    Trigger = "02:06:21"
-    Iteration = "IdNu"
-
-    update_execution_report(file_path, BuildNumber, Trigger, Iteration)
-
-    print("Execution report updated successfully.")
